@@ -163,6 +163,31 @@ int ESCCMD_arm_all( void )  {
   return 0;
 }
 
+int ESCCMD_enable_telemetry( uint8_t number_esc )  {
+  static int i, k;
+
+  for (i=0; i<number_esc; i++ ){
+    ESCCMD_cmd[i]=DSHOT_CMD_SIGNAL_LINE_CONTINUOUS_ERPM_TELEMETRY;
+    ESCCMD_tlm[i]=1;
+  }
+
+  // Send command ESCCMD_CMD_ARMING_REP times
+  for ( i = 0; i < ESCCMD_CMD_ARMING_REP; i++ )  {
+
+    // Send DSHOT signal to all ESCs
+    if ( DSHOT_send( ESCCMD_cmd, ESCCMD_tlm ) ) {
+      for ( k = 0; k < ESCCMD_n; k++ )
+        ESCCMD_last_error[k] = ESCCMD_ERROR_DSHOT;
+      return ESCCMD_ERROR_DSHOT;
+    }
+
+    // Wait some time
+    delayMicroseconds( 2 * ESCCMD_CMD_DELAY );
+  }
+
+  return 0;
+}
+
 //
 //  Activate 3D mode
 //
@@ -845,6 +870,7 @@ uint8_t *ESCCMD_read_packet( uint8_t i )  {
   // Read all bytes in rx buffer up to packet length
   while ( ( ESCCMD_serial[i]->available( ) ) && 
           ( buffer_idx[i] < ESCCMD_TLM_LENGTH ) ) {
+    //ESCCMD_tlm[i] = 0;
           
     serial_ret = ESCCMD_serial[i]->read( );
       
@@ -856,13 +882,16 @@ uint8_t *ESCCMD_read_packet( uint8_t i )  {
   
   // Check if a complete packet has arrived
   if ( buffer_idx[i] == ESCCMD_TLM_LENGTH  )  {
-    
+    //ESCCMD_tlm[i] = 1;
+
     // Reset byte index in packet buffer
     buffer_idx[i] = 0;
     
     // Return pointer to buffer
+    Serial.println("Complete Package");
     return ESCCMD_bufferTlm[i];
   }
+
   #endif
 
   return NULL;
@@ -1011,12 +1040,17 @@ int ESCCMD_tic( void )  {
       }
       
       // Extract packet data
-      ESCCMD_extract_packet_data( i );
+      //ESCCMD_extract_packet_data( i );
+      Serial.println("Package: ");
+      for (unsigned int j=0; j<sizeof(ESCCMD_bufferTlm[0]); j++) {
+        Serial.println(ESCCMD_bufferTlm[0][j]);
+      }
     }
         
     // Check for exceeding packet pending
     if ( ESCCMD_tlm_pend[i] > ESCCMD_TLM_MAX_PEND ) {
-
+      
+      Serial.println("Lost Package");
       // Packet is considered as lost: update packet lost counter
       if ( ESCCMD_tlm_lost_cnt[i] >= ESCCMD_TLM_MAX_PKT_LOSS )  {
         ESCCMD_last_error[i] = ESCCMD_ERROR_TLM_LOST;
