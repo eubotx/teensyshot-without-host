@@ -108,9 +108,9 @@ void ESCCMD_init( uint8_t n )  {
   }
 
   // Initialize telemetry UART channels
-  for ( i = 0; i < ESCCMD_n; i++ )  {
+/*   for ( i = 0; i < ESCCMD_n; i++ )  {
     ESCCMD_serial[i]->begin( ESCCMD_TLM_UART_SPEED );
-  }
+  } */
 
   // Initialize DSHOT generation subsystem
   DSHOT_init( ESCCMD_n );
@@ -188,7 +188,9 @@ int ESCCMD_3D_on( void )  {
   // Define 3D on command
   for ( i = 0; i < ESCCMD_n; i++ )  {
     ESCCMD_cmd[i] = DSHOT_CMD_3D_MODE_ON;
-    ESCCMD_tlm[i] = 1;
+    //ESCCMD_tlm[i] = 1;
+    ESCCMD_tlm[i] = 0;
+
   }
 
   // Send command ESCCMD_CMD_REPETITION times
@@ -208,7 +210,8 @@ int ESCCMD_3D_on( void )  {
   // Define save settings command
   for ( i = 0; i < ESCCMD_n; i++ )  {
     ESCCMD_cmd[i] = DSHOT_CMD_SAVE_SETTINGS;
-    ESCCMD_tlm[i] = 1;
+    //ESCCMD_tlm[i] = 1;
+    ESCCMD_tlm[i] = 0;
   }
 
   // Send command ESCCMD_CMD_REPETITION times
@@ -269,7 +272,8 @@ int ESCCMD_3D_off( void )  {
   // Define 3D off command
   for ( i = 0; i < ESCCMD_n; i++ )  {
     ESCCMD_cmd[i] = DSHOT_CMD_3D_MODE_OFF;
-    ESCCMD_tlm[i] = 1;
+    //ESCCMD_tlm[i] = 1;
+    ESCCMD_tlm[i] = 0;
   }
 
   // Send command ESCCMD_CMD_REPETITION times
@@ -289,7 +293,8 @@ int ESCCMD_3D_off( void )  {
   // Define save settings command
   for ( i = 0; i < ESCCMD_n; i++ )  {
     ESCCMD_cmd[i] = DSHOT_CMD_SAVE_SETTINGS;
-    ESCCMD_tlm[i] = 1;
+    //ESCCMD_tlm[i] = 1;
+    ESCCMD_tlm[i] = 0;
   }
 
   // Send command ESCCMD_CMD_REPETITION times
@@ -463,7 +468,8 @@ int ESCCMD_throttle( uint8_t i, int16_t throttle ) {
     noInterrupts();
     ESCCMD_state[i] |= ESCCMD_STATE_START;
     interrupts();
-    ESCCMD_tlm[i] = 1;
+    //ESCCMD_tlm[i] = 1;
+    ESCCMD_tlm[i] = 0;
   }
 
   // Reset the throttle watchdog
@@ -994,7 +1000,7 @@ int ESCCMD_tic( void )  {
     return 0;
   }
     
-  //// Read telemetry
+  /* //// Read telemetry
   
   for ( i = 0; i < ESCCMD_n; i++ )  {
     
@@ -1028,7 +1034,7 @@ int ESCCMD_tic( void )  {
       // Decrement packet pending counter
       ESCCMD_tlm_pend[i]--;
     }
-  }
+  } */
   
   //// Process clock tics
   
